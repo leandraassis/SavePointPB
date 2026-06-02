@@ -13,9 +13,9 @@ public class CreateGameDTO {
     private Long rawgId;
 
     @NotNull
-    private GameStatus gameStatus;
+    private GameStatus status;
 
     @Min(1)
-    @Max(2)
+    @Max(5)
     private Integer rating;
 }

@@ -12,7 +12,8 @@ public class GameResponseDTO {
     private Long rawgId;
     private String name;
     private String imageUrl;
-    private GameStatus gameStatus;
+    private GameStatus status;
+    private Integer rating;
     private LocalDateTime createdAt;
 
 
