@@ -4,6 +4,8 @@ import com.assis.gamelog.dto.rawg.RawgGameDTO;
 import com.assis.gamelog.dto.request.CreateGameDTO;
 import com.assis.gamelog.dto.request.UpdateGameDTO;
 import com.assis.gamelog.dto.response.GameResponseDTO;
+import com.assis.gamelog.exception.GameAlreadyExistsException;
+import com.assis.gamelog.exception.GameNotFoundException;
 import com.assis.gamelog.model.Game;
 import com.assis.gamelog.repository.GameRepository;
 import com.assis.gamelog.service.GameService;
@@ -22,7 +24,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public GameResponseDTO addGame(CreateGameDTO dto) {
-        if(gameRepository.existsByRawgId(dto.getRawgId())) throw new RuntimeException("Game already exists");
+        if(gameRepository.existsByRawgId(dto.getRawgId())) throw new GameAlreadyExistsException("Game already exists");
 
         RawgGameDTO rawgGame = rawgService.getGameById(dto.getRawgId());
 
@@ -64,7 +66,7 @@ public class GameServiceImpl implements GameService {
     //
 
     private Game findGameById(Long id) {
-        return gameRepository.findById(id).orElseThrow(() -> new RuntimeException("Game not found"));
+        return gameRepository.findById(id).orElseThrow(() -> new GameNotFoundException("Game not found"));
     }
 
     private GameResponseDTO toResponseDTO(Game game) {
