@@ -26,6 +26,11 @@ export default function SearchPage() {
             await addGame({ rawgId, status: GAME_STATUS.WISHLIST});
             alert("Jogo adicionado com sucesso!");
         } catch(error) {
+            if(error.message === "409") {
+                alert("Esse jogo já está na sua biblioteca.");
+            } else {
+                alert("Erro ao adicionar jogo.");
+            }
             console.error(error);
         }
         

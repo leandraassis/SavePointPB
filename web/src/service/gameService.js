@@ -25,7 +25,7 @@ export async function addGame(game) {
         body: JSON.stringify(game)
     });
 
-    if(!response.ok) throw new Error("Failed to add game");
+    if(!response.ok) throw new Error(response.status);
 
     return response.json();
 }
