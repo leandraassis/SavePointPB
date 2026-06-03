@@ -3,6 +3,7 @@ import { addGame, searchGames } from "../service/gameService";
 import GameCard from "../components/GameCard";
 import Navbar from "../components/Navbar";
 import "../style/SearchPage.css"
+import { GAME_STATUS } from "../constants/gameStatus";
 
 export default function SearchPage() {
 
@@ -22,7 +23,7 @@ export default function SearchPage() {
 
     async function handleAddGame(rawgId) {
         try {
-            await addGame({ rawgId, status: "WISHLIST"});
+            await addGame({ rawgId, status: GAME_STATUS.WISHLIST});
             alert("Jogo adicionado com sucesso!");
         } catch(error) {
             console.error(error);

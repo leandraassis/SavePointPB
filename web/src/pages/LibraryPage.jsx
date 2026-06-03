@@ -1,13 +1,43 @@
 import { useEffect, useState } from "react";
-import { deleteGame, getLibrary } from "../service/gameService";
+import { deleteGame, getLibrary, updateGame } from "../service/gameService";
 import GameCard from "../components/GameCard";
 import Navbar from "../components/Navbar";
+import EditGameModal from "../components/EditGameModal";
 import "../style/LibraryPage.css"
 
 export default function LibraryPage() {
 
     const [games, setGames] = useState([]);
+    const [selectedGame, setSelectedGame] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    //update jogo e handlers do modal
+    function handleOpenModal(game) {
+        setSelectedGame(game);
+        setIsModalOpen(true);
+    }
 
+    function handleCloseModal() {
+        setSelectedGame(null);
+        setIsModalOpen(false);
+    }
+
+    async function handleSave(updatedData) {
+        try {
+            const updatedGame = await updateGame(selectedGame.id, updatedData);
+
+            setGames(current => current.map(game =>
+                game.id === updatedGame.id ? updatedGame : game
+            ));
+
+            handleCloseModal();
+            
+        } catch(error) {
+            console.error(error);
+        }
+    }
+
+    //carregar biblioteca
     useEffect(() => {
         async function loadGames() {
             try {
@@ -21,6 +51,7 @@ export default function LibraryPage() {
         loadGames();
     }, []);
 
+    //deletar jogo
     async function handleDelete(id) {
         try {
             await deleteGame(id);
@@ -42,12 +73,15 @@ export default function LibraryPage() {
                     
                     {games.map(game => (
                         <GameCard key={game.id} game={game}>
-                            <button>editar</button>
+                            <button onClick={() => handleOpenModal(game)}>editar</button>
                             <button onClick={() => handleDelete(game.id)}>excluir</button>
                         </GameCard>
                     ))}
                 </div>
+                <EditGameModal isOpen={isModalOpen} game={selectedGame} 
+                onClose={handleCloseModal} onSave={handleSave}/>
             </div>
+            
         </>
     )
 }

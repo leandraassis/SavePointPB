@@ -1,0 +1,8 @@
+export const GAME_STATUS = {
+    PLAYING: "PLAYING",
+    COMPLETED: "COMPLETED",
+    DROPPED: "DROPPED",
+    WISHLIST: "WISHLIST"
+};
+
+export const GAME_STATUS_OPTIONS = Object.values(GAME_STATUS);
