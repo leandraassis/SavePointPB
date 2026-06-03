@@ -1,0 +1,27 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0f0f1a;
+  color: #e0e0e0;
+  font-family: sans-serif;
+  min-height: 100vh;
+}
+
+main {
+  padding: 24px;
+}
+
+h1, h2, h3 {
+  color: #f0f0f0;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}

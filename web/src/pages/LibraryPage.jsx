@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { getLibrary } from "../service/gameService";
+import { deleteGame, getLibrary } from "../service/gameService";
+import GameCard from "../components/GameCard";
+import Navbar from "../components/Navbar";
+import "../style/LibraryPage.css"
 
 export default function LibraryPage() {
 
@@ -18,18 +21,33 @@ export default function LibraryPage() {
         loadGames();
     }, []);
 
-    return(
-        <div>
-            <h1>Biblioteca</h1>
+    async function handleDelete(id) {
+        try {
+            await deleteGame(id);
+            setGames(current => current.filter(game => game.id !== id))
+        } catch(error) {
+            console.error(error);
+        }
+    }
 
-            {games.map(game => (
-                <div key={game.id}>
-                    <h3>{game.name}</h3>
-                    <p>Status: {game.status}</p>
-                    <p>Nota: {game.rating}</p>
-                    <img src={game.imageUrl} alt={game.name} width={200} />
+    return(
+        <>
+            <Navbar />
+
+            <div className="library-page">
+                <h1>Biblioteca</h1>
+                <hr />
+
+                <div className="cards-grid">
+                    
+                    {games.map(game => (
+                        <GameCard key={game.id} game={game}>
+                            <button>editar</button>
+                            <button onClick={() => handleDelete(game.id)}>excluir</button>
+                        </GameCard>
+                    ))}
                 </div>
-            ))}
-        </div>
+            </div>
+        </>
     )
 }

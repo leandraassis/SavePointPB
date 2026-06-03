@@ -1,5 +1,8 @@
 import { useState } from "react"
-import { searchGames } from "../service/gameService";
+import { addGame, searchGames } from "../service/gameService";
+import GameCard from "../components/GameCard";
+import Navbar from "../components/Navbar";
+import "../style/SearchPage.css"
 
 export default function SearchPage() {
 
@@ -16,28 +19,46 @@ export default function SearchPage() {
             console.error(error)
         }
     }
+
+    async function handleAddGame(rawgId) {
+        try {
+            await addGame({ rawgId, status: "WISHLIST"});
+            alert("Jogo adicionado com sucesso!");
+        } catch(error) {
+            console.error(error);
+        }
+        
+    }
     
     return(
-        <div>
-            <h1>Pesquisar jogos</h1>
-            <input type="text" 
-            value={query} 
-            onChange={(e) => setQuery(e.target.value)} 
-            placeholder="Digite um jogo..." 
-            />
+        <>
+            <Navbar />
+            
+            <div className="search-page">
+                <h1>Pesquisar jogos</h1>
 
-            <button onClick={handleSearch}>
-                Buscar
-            </button>
+                <div className="search-controls">
+                    <input type="text" 
+                    value={query} 
+                    onChange={(e) => setQuery(e.target.value)} 
+                    placeholder="Digite um jogo..." 
+                    />
 
-            <hr />
-
-            {games.map(game => (
-                <div key={game.rawgId}>
-                    <h3>{game.name}</h3>
-                    <img src={game.imageUrl} alt={game.name} width={200} />
+                    <button onClick={handleSearch}>
+                        Buscar
+                    </button>
                 </div>
-            ))}
-        </div>
+                
+                <hr />
+
+                <div className="cards-grid">
+                    {games.map(game => (
+                        <GameCard key={game.rawgId} game={game}>
+                            <button onClick={() => handleAddGame(game.rawgId)}>adicionar</button>
+                        </GameCard>
+                    ))}
+                </div>
+            </div>
+        </>
     );
 }
