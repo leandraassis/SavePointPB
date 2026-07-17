@@ -2,6 +2,7 @@ package com.assis.gamelog.controller;
 
 import com.assis.gamelog.dto.request.CreateGameDTO;
 import com.assis.gamelog.dto.request.UpdateGameDTO;
+import com.assis.gamelog.dto.response.GameHistoryDTO;
 import com.assis.gamelog.dto.response.GameResponseDTO;
 import com.assis.gamelog.dto.response.SearchGameDTO;
 import com.assis.gamelog.service.GameService;
@@ -9,6 +10,7 @@ import com.assis.gamelog.service.RawgService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,6 +51,11 @@ public class GameController {
     @GetMapping("/search")
     public List<SearchGameDTO> searchGames(@RequestParam String query) {
         return rawgService.searchGames(query);
+    }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<GameHistoryDTO>> getGameHistory(@PathVariable Long id) {
+        return ResponseEntity.ok(gameService.getGameHistory(id));
     }
 
 }
