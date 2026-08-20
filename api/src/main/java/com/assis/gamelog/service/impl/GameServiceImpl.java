@@ -1,18 +1,18 @@
 package com.assis.gamelog.service.impl;
 
-import com.assis.gamelog.dto.rawg.RawgGameDTO;
+import com.assis.gamelog.dto.catalog.CatalogGameDTO;
 import com.assis.gamelog.dto.request.CreateGameDTO;
 import com.assis.gamelog.dto.request.UpdateGameDTO;
 import com.assis.gamelog.dto.response.GameHistoryDTO;
 import com.assis.gamelog.dto.response.GameResponseDTO;
 import com.assis.gamelog.exception.GameAlreadyExistsException;
 import com.assis.gamelog.exception.GameNotFoundException;
+import com.assis.gamelog.client.CatalogServiceClient;
 import com.assis.gamelog.model.Game;
 import com.assis.gamelog.model.GameHistory;
 import com.assis.gamelog.repository.GameHistoryRepository;
 import com.assis.gamelog.repository.GameRepository;
 import com.assis.gamelog.service.GameService;
-import com.assis.gamelog.service.RawgService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,18 +25,18 @@ import java.util.Objects;
 public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
-    private final RawgService rawgService;
+    private final CatalogServiceClient catalogServiceClient;
     private final GameHistoryRepository gameHistoryRepository;
 
     @Override
     public GameResponseDTO addGame(CreateGameDTO dto) {
         if(gameRepository.existsByRawgId(dto.getRawgId())) throw new GameAlreadyExistsException("Game already exists");
 
-        RawgGameDTO rawgGame = rawgService.getGameById(dto.getRawgId());
+        CatalogGameDTO catalogGame = catalogServiceClient.getGameByRawgId(dto.getRawgId());
 
-        Game game = Game.builder().rawgId(rawgGame.getId())
-                .name(rawgGame.getName())
-                .imageUrl(rawgGame.getBackgroundImage())
+        Game game = Game.builder().rawgId(catalogGame.getRawgId())
+                .name(catalogGame.getName())
+                .imageUrl(catalogGame.getImageUrl())
                 .status(dto.getStatus())
                 .rating(dto.getRating()).build();
 

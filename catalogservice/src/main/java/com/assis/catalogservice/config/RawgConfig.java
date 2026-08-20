@@ -1,4 +1,4 @@
-package com.assis.gamelog.config;
+package com.assis.catalogservice.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,3 +16,4 @@ public class RawgConfig {
     }
 
 }
+

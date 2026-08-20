@@ -1,4 +1,4 @@
-package com.assis.gamelog.dto.rawg;
+package com.assis.catalogservice.dto.rawg;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,3 +13,4 @@ public class RawgGameDTO {
     @JsonProperty("background_image")
     private String backgroundImage;
 }
+

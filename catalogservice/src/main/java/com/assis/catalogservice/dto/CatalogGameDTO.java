@@ -1,9 +1,9 @@
-package com.assis.gamelog.dto.response;
+package com.assis.catalogservice.dto;
 
 import lombok.Data;
 
 @Data
-public class SearchGameDTO {
+public class CatalogGameDTO {
     private Long rawgId;
     private String name;
     private String imageUrl;

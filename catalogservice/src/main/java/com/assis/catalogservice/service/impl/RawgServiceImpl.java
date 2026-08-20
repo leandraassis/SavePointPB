@@ -1,9 +1,9 @@
-package com.assis.gamelog.service.impl;
+package com.assis.catalogservice.service.impl;
 
-import com.assis.gamelog.dto.rawg.RawgGameDTO;
-import com.assis.gamelog.dto.rawg.RawgSearchResponseDTO;
-import com.assis.gamelog.dto.response.SearchGameDTO;
-import com.assis.gamelog.service.RawgService;
+import com.assis.catalogservice.dto.CatalogGameDTO;
+import com.assis.catalogservice.dto.rawg.RawgGameDTO;
+import com.assis.catalogservice.dto.rawg.RawgSearchResponseDTO;
+import com.assis.catalogservice.service.RawgService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,14 +20,14 @@ public class RawgServiceImpl implements RawgService {
     private String apiKey;
 
     @Override
-    public List<SearchGameDTO> searchGames(String gameName) {
+    public List<CatalogGameDTO> searchGames(String gameName) {
         RawgSearchResponseDTO response = rawgRestClient.get().uri(uriBuilder -> uriBuilder
                 .path("/games")
                 .queryParam("key", apiKey)
                 .queryParam("search", gameName)
                 .build()).retrieve().body(RawgSearchResponseDTO.class);
 
-        return response.getResults().stream().map(this::toSearchGameDTO).toList();
+        return response.getResults().stream().map(this::toCatalogGameDTO).toList();
     }
 
     @Override
@@ -38,8 +38,8 @@ public class RawgServiceImpl implements RawgService {
                 .build(rawgId)).retrieve().body(RawgGameDTO.class);
     }
 
-    private SearchGameDTO toSearchGameDTO(RawgGameDTO rawgGame) {
-        SearchGameDTO dto = new SearchGameDTO();
+    private CatalogGameDTO toCatalogGameDTO(RawgGameDTO rawgGame) {
+        CatalogGameDTO dto = new CatalogGameDTO();
 
         dto.setRawgId(rawgGame.getId());
         dto.setName(rawgGame.getName());

@@ -1,4 +1,4 @@
-package com.assis.gamelog.dto.rawg;
+package com.assis.catalogservice.dto.rawg;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

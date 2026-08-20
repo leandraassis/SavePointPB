@@ -1,12 +1,12 @@
 package com.assis.gamelog.controller;
 
+import com.assis.gamelog.dto.catalog.CatalogGameDTO;
 import com.assis.gamelog.dto.request.CreateGameDTO;
 import com.assis.gamelog.dto.request.UpdateGameDTO;
 import com.assis.gamelog.dto.response.GameHistoryDTO;
 import com.assis.gamelog.dto.response.GameResponseDTO;
-import com.assis.gamelog.dto.response.SearchGameDTO;
+import com.assis.gamelog.client.CatalogServiceClient;
 import com.assis.gamelog.service.GameService;
-import com.assis.gamelog.service.RawgService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GameController {
     private final GameService gameService;
-    private final RawgService rawgService;
+    private final CatalogServiceClient catalogServiceClient;
 
     @GetMapping
     public List<GameResponseDTO> getAllGames() {
@@ -49,8 +49,8 @@ public class GameController {
     }
 
     @GetMapping("/search")
-    public List<SearchGameDTO> searchGames(@RequestParam String query) {
-        return rawgService.searchGames(query);
+    public List<CatalogGameDTO> searchGames(@RequestParam String query) {
+        return catalogServiceClient.searchGames(query);
     }
 
     @GetMapping("/{id}/history")
