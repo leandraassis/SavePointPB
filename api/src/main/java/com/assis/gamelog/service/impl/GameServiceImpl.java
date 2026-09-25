@@ -29,12 +29,13 @@ public class GameServiceImpl implements GameService {
     private final GameHistoryRepository gameHistoryRepository;
 
     @Override
-    public GameResponseDTO addGame(CreateGameDTO dto) {
-        if(gameRepository.existsByRawgId(dto.getRawgId())) throw new GameAlreadyExistsException("Game already exists");
+    public GameResponseDTO addGame(Long userId, CreateGameDTO dto) {
+        if(gameRepository.existsByUserIdAndRawgId(userId, dto.getRawgId())) throw new GameAlreadyExistsException("Game already exists");
 
         CatalogGameDTO catalogGame = catalogServiceClient.getGameByRawgId(dto.getRawgId());
 
-        Game game = Game.builder().rawgId(catalogGame.getRawgId())
+        Game game = Game.builder().userId(userId)
+                .rawgId(catalogGame.getRawgId())
                 .name(catalogGame.getName())
                 .imageUrl(catalogGame.getImageUrl())
                 .status(dto.getStatus())
@@ -45,24 +46,24 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<GameResponseDTO> getAllGames() {
-        return gameRepository.findAll().stream().map(this::toResponseDTO).toList();
+    public List<GameResponseDTO> getAllGames(Long userId) {
+        return gameRepository.findByUserId(userId).stream().map(this::toResponseDTO).toList();
     }
 
     @Override
-    public GameResponseDTO getGameById(Long id) {
-        return toResponseDTO(findGameById(id));
+    public GameResponseDTO getGameById(Long userId, Long id) {
+        return toResponseDTO(findGameById(userId, id));
     }
 
     @Override
-    public GameResponseDTO updateGame(Long id, UpdateGameDTO dto) {
-        Game game = findGameById(id);
+    public GameResponseDTO updateGame(Long userId, Long id, UpdateGameDTO dto) {
+        Game game = findGameById(userId, id);
         if(dto.getStatus() != null) {
-            logChange(game.getId(), "status", game.getStatus(), dto.getStatus());
+            logChange(game, "status", game.getStatus(), dto.getStatus());
             game.setStatus(dto.getStatus());
         }
         if(dto.getRating() != null) {
-            logChange(game.getId(), "rating", game.getRating(), dto.getRating());
+            logChange(game, "rating", game.getRating(), dto.getRating());
             game.setRating(dto.getRating());
         }
 
@@ -72,27 +73,27 @@ public class GameServiceImpl implements GameService {
 
     @Override
     @Transactional
-    public void deleteGame(Long id) {
-        Game game = findGameById(id);
-        logChange(game.getId(), "status", game.getStatus(), "DELETED");
+    public void deleteGame(Long userId, Long id) {
+        Game game = findGameById(userId, id);
+        logChange(game, "status", game.getStatus(), "DELETED");
         gameRepository.delete(game);
     }
 
     @Override
-    public List<GameHistoryDTO> getGameHistory(Long id) {
-        return gameHistoryRepository.findByGameIdOrderByChangedAtDesc(id).stream()
+    public List<GameHistoryDTO> getGameHistory(Long userId, Long id) {
+        return gameHistoryRepository.findByUserIdAndGameIdOrderByChangedAtDesc(userId, id).stream()
                 .map(this::toHistoryDTO)
                 .toList();
     }
 
-    //
-    private void logChange(Long gameId, String fieldName, Object oldValue, Object newValue) {
+    private void logChange(Game game, String fieldName, Object oldValue, Object newValue) {
         boolean changed = !Objects.equals(oldValue, newValue);
 
         if (!changed) return;
 
         GameHistory history = GameHistory.builder()
-                .gameId(gameId)
+                .userId(game.getUserId())
+                .gameId(game.getId())
                 .fieldName(fieldName)
                 .oldValue(oldValue != null ? oldValue.toString() : null)
                 .newValue(newValue != null ? newValue.toString() : null)
@@ -101,8 +102,9 @@ public class GameServiceImpl implements GameService {
         gameHistoryRepository.save(history);
     }
 
-    private Game findGameById(Long id) {
-        return gameRepository.findById(id).orElseThrow(() -> new GameNotFoundException("Game not found"));
+    //jogo de outro usuário cai no mesmo 404 de jogo inexistente, para não revelar que ele existe
+    private Game findGameById(Long userId, Long id) {
+        return gameRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new GameNotFoundException("Game not found"));
     }
 
     private GameResponseDTO toResponseDTO(Game game) {

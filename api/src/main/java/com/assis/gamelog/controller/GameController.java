@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,29 +25,29 @@ public class GameController {
     private final CatalogServiceClient catalogServiceClient;
 
     @GetMapping
-    public List<GameResponseDTO> getAllGames() {
-        return gameService.getAllGames();
+    public List<GameResponseDTO> getAllGames(@AuthenticationPrincipal Jwt jwt) {
+        return gameService.getAllGames(getUserId(jwt));
     }
 
     @PostMapping
-    public GameResponseDTO addGame(@RequestBody @Valid CreateGameDTO dto) {
-        return gameService.addGame(dto);
+    public GameResponseDTO addGame(@AuthenticationPrincipal Jwt jwt, @RequestBody @Valid CreateGameDTO dto) {
+        return gameService.addGame(getUserId(jwt), dto);
     }
 
     @GetMapping("/{id}")
-    public GameResponseDTO getGameById(@PathVariable Long id) {
-        return gameService.getGameById(id);
+    public GameResponseDTO getGameById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        return gameService.getGameById(getUserId(jwt), id);
     }
 
     @PutMapping("/{id}")
-    public GameResponseDTO updateGame(@PathVariable Long id, @RequestBody @Valid UpdateGameDTO dto) {
-        return gameService.updateGame(id, dto);
+    public GameResponseDTO updateGame(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id, @RequestBody @Valid UpdateGameDTO dto) {
+        return gameService.updateGame(getUserId(jwt), id, dto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteGame(@PathVariable Long id) {
-        gameService.deleteGame(id);
+    public void deleteGame(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        gameService.deleteGame(getUserId(jwt), id);
     }
 
     @GetMapping("/search")
@@ -54,8 +56,12 @@ public class GameController {
     }
 
     @GetMapping("/{id}/history")
-    public ResponseEntity<List<GameHistoryDTO>> getGameHistory(@PathVariable Long id) {
-        return ResponseEntity.ok(gameService.getGameHistory(id));
+    public ResponseEntity<List<GameHistoryDTO>> getGameHistory(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        return ResponseEntity.ok(gameService.getGameHistory(getUserId(jwt), id));
+    }
+
+    private Long getUserId(Jwt jwt) {
+        return Long.valueOf(jwt.getSubject());
     }
 
 }

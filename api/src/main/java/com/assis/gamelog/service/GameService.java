@@ -8,10 +8,10 @@ import com.assis.gamelog.dto.response.GameResponseDTO;
 import java.util.List;
 
 public interface GameService {
-    GameResponseDTO addGame(CreateGameDTO dto);
-    List<GameResponseDTO> getAllGames();
-    GameResponseDTO getGameById(Long id);
-    GameResponseDTO updateGame(Long id, UpdateGameDTO dto);
-    void deleteGame(Long id);
-    List<GameHistoryDTO> getGameHistory(Long id);
+    GameResponseDTO addGame(Long userId, CreateGameDTO dto);
+    List<GameResponseDTO> getAllGames(Long userId);
+    GameResponseDTO getGameById(Long userId, Long id);
+    GameResponseDTO updateGame(Long userId, Long id, UpdateGameDTO dto);
+    void deleteGame(Long userId, Long id);
+    List<GameHistoryDTO> getGameHistory(Long userId, Long id);
 }

@@ -1,21 +1,18 @@
 package com.assis.gamelog.model;
 
-
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "games", uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "rawgId"}))
+@Table(name = "refresh_tokens")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Game {
+public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,27 +21,20 @@ public class Game {
     @Column(nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
-    private Long rawgId;
+    @Column(unique = true, nullable = false)
+    private String tokenHash;
 
     @Column(nullable = false)
-    private String name;
+    private LocalDateTime expiresAt;
 
-    private String imageUrl;
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private GameStatus status;
-
-    @Min(1)
-    @Max(5)
-    private Integer rating;
+    private boolean revoked;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
     public void prePersist() {
-        if(createdAt == null) createdAt = LocalDateTime.now();
+        if (createdAt == null) createdAt = LocalDateTime.now();
     }
 }

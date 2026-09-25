@@ -9,8 +9,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/games/**").allowedOrigins("http://localhost:5173")
+        registry.addMapping("/api/**").allowedOrigins("http://localhost:5173")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowedHeaders("Content-Type");
+                .allowedHeaders("Content-Type", "Authorization")
+                .allowCredentials(true);
     }
 }
