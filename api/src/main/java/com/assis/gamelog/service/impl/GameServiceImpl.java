@@ -1,6 +1,8 @@
 package com.assis.gamelog.service.impl;
 
 import com.assis.gamelog.dto.catalog.CatalogGameDTO;
+import com.assis.gamelog.dto.event.GameAddedEvent;
+import com.assis.gamelog.dto.event.GameChangedEvent;
 import com.assis.gamelog.dto.request.CreateGameDTO;
 import com.assis.gamelog.dto.request.UpdateGameDTO;
 import com.assis.gamelog.dto.response.GameHistoryDTO;
@@ -8,6 +10,7 @@ import com.assis.gamelog.dto.response.GameResponseDTO;
 import com.assis.gamelog.exception.GameAlreadyExistsException;
 import com.assis.gamelog.exception.GameNotFoundException;
 import com.assis.gamelog.client.CatalogServiceClient;
+import com.assis.gamelog.messaging.GameEventOutbox;
 import com.assis.gamelog.model.Game;
 import com.assis.gamelog.model.GameHistory;
 import com.assis.gamelog.repository.GameHistoryRepository;
@@ -17,8 +20,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,21 +32,29 @@ public class GameServiceImpl implements GameService {
     private final GameRepository gameRepository;
     private final CatalogServiceClient catalogServiceClient;
     private final GameHistoryRepository gameHistoryRepository;
+    private final GameEventOutbox gameEventOutbox;
 
     @Override
+    @Transactional
     public GameResponseDTO addGame(Long userId, CreateGameDTO dto) {
         if(gameRepository.existsByUserIdAndRawgId(userId, dto.getRawgId())) throw new GameAlreadyExistsException("Game already exists");
 
-        CatalogGameDTO catalogGame = catalogServiceClient.getGameByRawgId(dto.getRawgId());
+        if(dto.getName() == null || dto.getName().isBlank()) return addGameFromCatalog(userId, dto);
 
         Game game = Game.builder().userId(userId)
-                .rawgId(catalogGame.getRawgId())
-                .name(catalogGame.getName())
-                .imageUrl(catalogGame.getImageUrl())
+                .rawgId(dto.getRawgId())
+                .name(dto.getName())
+                .imageUrl(dto.getImageUrl())
                 .status(dto.getStatus())
                 .rating(dto.getRating()).build();
 
         Game savedGame = gameRepository.save(game);
+
+        GameAddedEvent event = new GameAddedEvent();
+        event.setEventId(UUID.randomUUID().toString());
+        event.setRawgId(savedGame.getRawgId());
+        gameEventOutbox.register(event);
+
         return toResponseDTO(savedGame);
     }
 
@@ -56,6 +69,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    @Transactional
     public GameResponseDTO updateGame(Long userId, Long id, UpdateGameDTO dto) {
         Game game = findGameById(userId, id);
         if(dto.getStatus() != null) {
@@ -91,18 +105,32 @@ public class GameServiceImpl implements GameService {
 
         if (!changed) return;
 
-        GameHistory history = GameHistory.builder()
-                .userId(game.getUserId())
-                .gameId(game.getId())
-                .fieldName(fieldName)
-                .oldValue(oldValue != null ? oldValue.toString() : null)
-                .newValue(newValue != null ? newValue.toString() : null)
-                .build();
+        GameChangedEvent event = new GameChangedEvent();
+        event.setEventId(UUID.randomUUID().toString());
+        event.setUserId(game.getUserId());
+        event.setGameId(game.getId());
+        event.setFieldName(fieldName);
+        event.setOldValue(oldValue != null ? oldValue.toString() : null);
+        event.setNewValue(newValue != null ? newValue.toString() : null);
+        event.setOccurredAt(LocalDateTime.now());
 
-        gameHistoryRepository.save(history);
+        gameEventOutbox.register(event);
     }
 
-    //jogo de outro usuário cai no mesmo 404 de jogo inexistente, para não revelar que ele existe
+    private GameResponseDTO addGameFromCatalog(Long userId, CreateGameDTO dto) {
+        CatalogGameDTO catalogGame = catalogServiceClient.getGameByRawgId(dto.getRawgId());
+
+        Game game = Game.builder().userId(userId)
+                .rawgId(catalogGame.getRawgId())
+                .name(catalogGame.getName())
+                .imageUrl(catalogGame.getImageUrl())
+                .status(dto.getStatus())
+                .rating(dto.getRating()).build();
+
+        Game savedGame = gameRepository.save(game);
+        return toResponseDTO(savedGame);
+    }
+
     private Game findGameById(Long userId, Long id) {
         return gameRepository.findByIdAndUserId(id, userId).orElseThrow(() -> new GameNotFoundException("Game not found"));
     }

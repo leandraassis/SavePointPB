@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.List;
 
@@ -96,5 +97,32 @@ class GameHistoryRepositoryTest {
         List<GameHistory> result = historyRepository.findByUserIdAndGameIdOrderByChangedAtDesc(1L, game.getId());
 
         assertEquals(1, result.size());
+    }
+
+    @Test
+    void shouldReturnTrueWhenEventIdAlreadyExists() {
+        GameHistory history = GameHistory.builder()
+                .eventId("event-1").userId(1L).gameId(30L).fieldName("status").oldValue("PLAYING").newValue("COMPLETED")
+                .build();
+        entityManager.persistAndFlush(history);
+
+        assertTrue(historyRepository.existsByEventId("event-1"));
+        assertFalse(historyRepository.existsByEventId("event-2"));
+    }
+
+    @Test
+    void shouldNotAllowDuplicateEventId() {
+        GameHistory first = GameHistory.builder()
+                .eventId("event-3").userId(1L).gameId(40L).fieldName("status").oldValue("PLAYING").newValue("COMPLETED")
+                .build();
+        entityManager.persistAndFlush(first);
+
+        GameHistory duplicated = GameHistory.builder()
+                .eventId("event-3").userId(1L).gameId(40L).fieldName("status").oldValue("PLAYING").newValue("COMPLETED")
+                .build();
+
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            historyRepository.saveAndFlush(duplicated);
+        });
     }
 }

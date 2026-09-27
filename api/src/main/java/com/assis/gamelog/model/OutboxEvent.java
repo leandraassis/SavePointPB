@@ -2,42 +2,38 @@ package com.assis.gamelog.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "game_history")
+@Table(name = "outbox_events")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GameHistory {
+public class OutboxEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String eventId;
 
     @Column(nullable = false)
-    private Long userId;
+    private String routingKey;
+
+    @Column(nullable = false, length = 2000)
+    private String payload;
 
     @Column(nullable = false)
-    private Long gameId;
+    private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private String fieldName;
-
-    private String oldValue;
-
-    private String newValue;
-
-    @Column(nullable = false)
-    private LocalDateTime changedAt;
+    private LocalDateTime publishedAt;
 
     @PrePersist
     public void prePersist() {
-        if (changedAt == null) changedAt = LocalDateTime.now();
+        if (createdAt == null) createdAt = LocalDateTime.now();
     }
 }

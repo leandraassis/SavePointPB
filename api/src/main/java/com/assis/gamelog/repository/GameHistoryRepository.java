@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface GameHistoryRepository extends JpaRepository<GameHistory, Long> {
     List<GameHistory> findByUserIdAndGameIdOrderByChangedAtDesc(Long userId, Long gameId);
+    boolean existsByEventId(String eventId);
 }

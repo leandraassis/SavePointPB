@@ -21,9 +21,9 @@ export default function SearchPage() {
         }
     }
 
-    async function handleAddGame(rawgId) {
+    async function handleAddGame(game) {
         try {
-            await addGame({ rawgId, status: GAME_STATUS.WISHLIST});
+            await addGame({ rawgId: game.rawgId, name: game.name, imageUrl: game.imageUrl, status: GAME_STATUS.WISHLIST});
             alert("Jogo adicionado com sucesso!");
         } catch(error) {
             if(error.message === "409") {
@@ -60,7 +60,7 @@ export default function SearchPage() {
                 <div className="cards-grid">
                     {games.map(game => (
                         <GameCard key={game.rawgId} game={game}>
-                            <button onClick={() => handleAddGame(game.rawgId)}>adicionar</button>
+                            <button onClick={() => handleAddGame(game)}>adicionar</button>
                         </GameCard>
                     ))}
                 </div>

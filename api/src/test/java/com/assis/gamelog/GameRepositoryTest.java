@@ -126,6 +126,23 @@ class GameRepositoryTest {
     }
 
     @Test
+    void shouldFindGamesFromAllUsersByRawgId() {
+        entityManager.persistAndFlush(Game.builder()
+                .userId(1L).rawgId(350L).name("Hades").status(GameStatus.PLAYING)
+                .build());
+        entityManager.persistAndFlush(Game.builder()
+                .userId(2L).rawgId(350L).name("Hades").status(GameStatus.WISHLIST)
+                .build());
+        entityManager.persistAndFlush(Game.builder()
+                .userId(1L).rawgId(360L).name("Celeste").status(GameStatus.COMPLETED)
+                .build());
+
+        List<Game> result = gameRepository.findByRawgId(350L);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
     void shouldNotAllowNullName() {
         Game game = Game.builder()
                 .userId(1L)

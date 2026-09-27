@@ -18,4 +18,7 @@ public class CreateGameDTO {
     @Min(1)
     @Max(5)
     private Integer rating;
+
+    private String name;
+    private String imageUrl;
 }
