@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: savegame
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: savegame
+
+resources:
+  - namespace.yaml
+  - postgres.yaml
+  - rabbitmq.yaml
+  - discoveryserver.yaml
+  - catalogservice.yaml
+  - api.yaml
+  - tempo.yaml
+  - loki.yaml
+  - grafana.yaml
+  - hpa.yaml
+
+configMapGenerator:
+  - name: tempo-config
+    files:
+      - monitoring/tempo.yaml
+  - name: grafana-datasources
+    files:
+      - monitoring/grafana/provisioning/datasources/datasources.yaml
+  - name: savegame-config
+    literals:
+      - JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discoveryserver:8761/eureka
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - MANAGEMENT_OPENTELEMETRY_LOGGING_EXPORT_OTLP_ENDPOINT=http://loki:3100/otlp/v1/logs
+  - name: postgres-init
+    literals:
+      - init.sql=CREATE DATABASE catalog;
+
+secretGenerator:
+  - name: postgres-credentials
+    literals:
+      - POSTGRES_USER=savegame
+      - POSTGRES_PASSWORD=savegame
+  - name: savegame-secrets
+    envs:
+      - .env

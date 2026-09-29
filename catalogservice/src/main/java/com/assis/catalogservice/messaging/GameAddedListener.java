@@ -19,7 +19,6 @@ public class GameAddedListener {
     private final CatalogGameService catalogGameService;
     private final RabbitTemplate rabbitTemplate;
 
-    //reprocessar o mesmo evento é seguro: o jogo já estará em cache e o evento publicado só repete os mesmos dados
     @RabbitListener(queues = RabbitConfig.GAME_ADDED_QUEUE)
     public void onGameAdded(GameAddedEvent event) {
         CatalogGameDTO game = catalogGameService.getGameByRawgId(event.getRawgId());

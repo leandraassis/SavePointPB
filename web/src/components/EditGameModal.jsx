@@ -1,18 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { GAME_STATUS_OPTIONS } from "../constants/gameStatus";
 import "../style/EditGameModal.css";
 
 export default function EditGameModal({ isOpen, game, onClose, onSave }) {
-    
-    const [status, setStatus] = useState("");
-    const [rating, setRating] = useState("");
 
-    useEffect(() => {
-        if(game) {
-            setStatus(game.status);
-            setRating(game.rating ?? "");
-        }
-    }, [game]);
+    const [status, setStatus] = useState(game?.status ?? "");
+    const [rating, setRating] = useState(game?.rating ?? "");
 
     if(!isOpen) return null;
 

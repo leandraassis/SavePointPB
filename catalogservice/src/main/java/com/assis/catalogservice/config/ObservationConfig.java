@@ -1,0 +1,16 @@
+package com.assis.catalogservice.config;
+
+import io.micrometer.observation.ObservationPredicate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.server.observation.ServerRequestObservationContext;
+
+@Configuration
+public class ObservationConfig {
+
+    @Bean
+    public ObservationPredicate ignoreActuatorRequests() {
+        return (name, context) -> !(context instanceof ServerRequestObservationContext serverContext
+                && serverContext.getCarrier().getRequestURI().startsWith("/actuator"));
+    }
+}

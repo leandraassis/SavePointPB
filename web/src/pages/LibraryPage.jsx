@@ -78,7 +78,7 @@ export default function LibraryPage() {
                         </GameCard>
                     ))}
                 </div>
-                <EditGameModal isOpen={isModalOpen} game={selectedGame} 
+                <EditGameModal key={selectedGame?.id} isOpen={isModalOpen} game={selectedGame}
                 onClose={handleCloseModal} onSave={handleSave}/>
             </div>
             

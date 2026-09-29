@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: discoveryserver
+spec:
+  type: LoadBalancer
+  selector:
+    app: discoveryserver
+  ports:
+    - port: 8761
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discoveryserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discoveryserver
+  template:
+    metadata:
+      labels:
+        app: discoveryserver
+    spec:
+      containers:
+        - name: discoveryserver
+          image: savegame-discoveryserver:latest
+          ports:
+            - containerPort: 8761
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: savegame-config
+                  key: JAVA_TOOL_OPTIONS
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8761
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8761
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8761
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi

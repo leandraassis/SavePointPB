@@ -3,6 +3,7 @@ package com.assis.gamelog.messaging;
 import com.assis.gamelog.config.RabbitConfig;
 import com.assis.gamelog.model.OutboxEvent;
 import com.assis.gamelog.repository.OutboxEventRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
@@ -22,6 +23,7 @@ public class OutboxPublisher {
     private final RabbitTemplate rabbitTemplate;
 
     @Scheduled(fixedDelay = 2000)
+    @Transactional
     public void publishPendingEvents() {
         for(OutboxEvent outboxEvent : outboxEventRepository.findTop50ByPublishedAtIsNullOrderByCreatedAtAsc()) {
             send(outboxEvent);
